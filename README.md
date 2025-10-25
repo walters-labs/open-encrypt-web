@@ -30,7 +30,7 @@ Currently using Rust crates `ring-lwe` v0.1.8 and `module-lwe` v0.1.5.
 
 ## Database (SQL)
 
-- The database and all tables can be initialized with the script `init_open_encrypt_database.sql`.
+- The database and all tables can be initialized with the script `schema.sql`.
 - Passwords are hashed using standard hashing. 
 - Secure, random tokens stored for user sessions.
 - Messages are stored encrypted on the server in a SQL database.
