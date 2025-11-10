@@ -35,7 +35,7 @@ $username = $_SESSION['user'];
 <header>
     <h1><a href="index.html">Open Encrypt</a></h1>
     <h2>Status: Development (10/8/2025)</h2>
-    <h2>Source: <a href="https://github.com/open-encrypt/open-encrypt-web">https://github.com/open-encrypt/open-encrypt-web</a></h2>
+    <h2>Source: <a href="https://github.com/walters-labs/open-encrypt-web">https://github.com/walters-labs/open-encrypt-web</a></h2>
     <nav>
         <a href="inbox.php" class="nav-link">Home</a>
         <a href="send_message.php" class="nav-link">Send Message</a>
