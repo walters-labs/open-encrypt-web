@@ -6,10 +6,11 @@ error_reporting(E_ALL);
 
 header('Content-Type: application/json');
 
-include_once '../include/db_config.php';
-include_once '../include/Database.php';
-include_once '../utils.php';
-include_once '../encryption.php';
+include_once(__DIR__ . '/../include/db_config.php');
+include_once(__DIR__ . '/../include/Database.php');
+include_once(__DIR__ . '/../include/utils.php');       // contains get_db()
+include_once(__DIR__ . '/../include/encryption.php');  // crypto functions
+include_once(__DIR__ . '/utils.php');                  // API-level utilities
 
 $db = get_db();
 
@@ -30,8 +31,8 @@ try {
     echo json_encode([
         'status'      => 'success',
         'method'      => $method,
-        'public_key'  => $keys['public_key'],
-        'secret_key'  => $keys['secret_key'],
+        'public_key'  => $keys['public'],
+        'secret_key'  => $keys['secret'],
     ]);
 
 } catch (Exception $e) {
