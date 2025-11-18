@@ -5,6 +5,14 @@
 
 Full-stack encrypted messaging application using lattice-based methods in Rust + PHP + SQL.
 
+## Disclaimer
+
+This app is meant for educational use.
+
+The encryption methods used have not been hardened against timing attacks or other side-channel attacks. 
+
+This code has not been audited for security.
+
 ## iOS
 
 iOS frontend written in Swift: [https://github.com/open-encrypt/open-encrypt-ios](https://github.com/open-encrypt/open-encrypt-ios)
@@ -17,14 +25,6 @@ The public API key is `open-encrypt-public-api-key`. It is currently rate limite
 
 - Documentation: [https://docs.open-encrypt.com](https://docs.open-encrypt.com)
 - RapidAPI: [https://rapidapi.com/jacksonwalters/api/open-encrypt](https://rapidapi.com/jacksonwalters/api/open-encrypt)
-
-## Disclaimer
-
-This app is meant for educational use.
-
-The encryption methods used have not been hardened against timing attacks or other side-channel attacks. 
-
-This code has not been audited for security.
 
 ## Encryption methods
 
