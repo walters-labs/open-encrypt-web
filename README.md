@@ -13,72 +13,10 @@ iOS frontend written in Swift: [https://github.com/open-encrypt/open-encrypt-ios
 
 A public API is available for performing key generation, encryption, and decryption.
 
-[https://rapidapi.com/jacksonwalters/api/open-encrypt](https://rapidapi.com/jacksonwalters/api/open-encrypt)
-
 The public API key is `open-encrypt-public-api-key`. It is currently rate limited to 60 requests / min.
 
-### Key Generation
-
-The endpoint is `api/keygen.php`. To generate public/secret keys, run the following command:
-```bash
-curl -X POST https://open-encrypt.com/api/keygen.php \
-  -H "Content-Type: application/json" \
-  -H "X-API-Key: open-encrypt-public-api-key" \
-  -d '{"method": "ring_lwe"}' > keys.json
-```
-
-This returns a JSON response with four fields: `{"status","method","public_key","secret_key"}`. 
-
-The public key and secret key are both base64-encoded strings. They will be piped to a file `keys.json`.
-
-### Encryption
-
-The endpoint is `api/encrypt.php`. Create `to_encrypt.json` using the public key from `keys.json`:
-
-```bash
-PUBLIC_KEY=$(jq -r '.public_key' keys.json)
-cat > to_encrypt.json <<EOF
-{
-  "method": "ring_lwe",
-  "public_key": "$PUBLIC_KEY",
-  "plaintext": "Hello world!"
-}
-EOF
-```
-
-Then encrypt the message:
-```bash
-curl -X POST https://open-encrypt.com/api/encrypt.php \
-  -H "Content-Type: application/json" \
-  -H "X-API-Key: open-encrypt-public-api-key" \
-  -d @to_encrypt.json > encrypted.json
-```
-
-### Decryption
-
-The endpoint is `api/decrypt.php`. Create `to_decrypt.json` using the secret key from `keys.json` and ciphertext from `encrypted.json`:
-
-```bash
-SECRET_KEY=$(jq -r '.secret_key' keys.json)
-CIPHERTEXT=$(jq -r '.ciphertext' encrypted.json)
-cat > to_decrypt.json <<EOF
-{
-  "method": "ring_lwe",
-  "secret_key": "$SECRET_KEY",
-  "ciphertext": "$CIPHERTEXT"
-}
-EOF
-```
-
-Then decrypt the message:
-```bash
-curl -X POST https://open-encrypt.com/api/decrypt.php \
-  -H "Content-Type: application/json" \
-  -H "X-API-Key: open-encrypt-public-api-key" \
-  -d @to_decrypt.json
-```
-
-**Note:** The `api_key` field in the JSON body is not needed when using the `X-API-Key` header.
+- Documentation: [https://docs.open-encrypt.com](https://docs.open-encrypt.com)
+- RapidAPI: [https://rapidapi.com/jacksonwalters/api/open-encrypt](https://rapidapi.com/jacksonwalters/api/open-encrypt)
 
 ## Disclaimer
 
