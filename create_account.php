@@ -74,8 +74,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 <header>
     <h1><a href="index.html">Open Encrypt</a></h1>
-    <h2>Status: Development (10/8/2025)</h2>
-    <h2>Source: <a href="https://github.com/open-encrypt/open-encrypt-web">https://github.com/open-encrypt/open-encrypt-web</a></h2>
+    <h2>Status: Development (11/18/2025)</h2>
+    <h3>Source: <a href="https://github.com/walters-labs/open-encrypt-web">https://github.com/walters-labs/open-encrypt-web</a></h3>
+    <h3>API Docs: <a href="https://docs.open-encrypt.com">https://docs.open-encrypt.com</a></h3>
 </header>
 
 <hr>
