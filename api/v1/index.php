@@ -27,7 +27,7 @@ if ($method === 'POST') {
             echo json_encode(['error' => 'Not Found']);
     }
 } elseif ($method === 'GET' && $path === '/health') {
-    echo json_encode(['status' => 'ok']);
+    include __DIR__ . '/../health.php';  // <-- include the real health check script here
 } else {
     http_response_code(405);
     echo json_encode(['error' => 'Method Not Allowed']);
