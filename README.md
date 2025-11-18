@@ -25,15 +25,13 @@ curl -X POST https://open-encrypt.com/api/keygen.php \
   -d '{"method": "ring_lwe"}' > keys.json
 ```
 
-This returns a JSON response with four fields: ["status","method","public_key","secret_key"]. 
+This returns a JSON response with four fields: `{"status","method","public_key","secret_key"}`. 
 
 The public key and secret key are both base64-encoded strings. They will be piped to a file `keys.json`.
 
 ### Encryption
 
-The endpoint is `api/encrypt.php`. 
-
-First, create `to_encrypt.json` using the public key from `keys.json`:
+The endpoint is `api/encrypt.php`. Create `to_encrypt.json` using the public key from `keys.json`:
 
 ```bash
 PUBLIC_KEY=$(jq -r '.public_key' keys.json)
@@ -56,9 +54,7 @@ curl -X POST https://open-encrypt.com/api/encrypt.php \
 
 ### Decryption
 
-The endpoint is `api/decrypt.php`.
-
-First, create `to_decrypt.json` using the secret key from `keys.json` and ciphertext from `encrypted.json`:
+The endpoint is `api/decrypt.php`. Create `to_decrypt.json` using the secret key from `keys.json` and ciphertext from `encrypted.json`:
 
 ```bash
 SECRET_KEY=$(jq -r '.secret_key' keys.json)
