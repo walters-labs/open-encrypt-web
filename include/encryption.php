@@ -26,14 +26,25 @@ function generate_keys(string $encryption_method = "ring_lwe"){
  *  @return string The encrypted ciphertext
  */
 function encrypt_message(string $public_key, string $plaintext, string $encryption_method = "ring_lwe") : string {
+
+    // Validate encryption method explicitly - fail fast if invalid
+    $valid_methods = ["ring_lwe", "module_lwe"];
+    if (!in_array($encryption_method, $valid_methods, true)) {
+        throw new Exception("Invalid encryption method: '$encryption_method'. Must be one of: " . implode(", ", $valid_methods));
+    }
+
     $binary_path = __DIR__ . '/../bin/';
     $binary = ($encryption_method == "ring_lwe" ? "ring-lwe-v0.1.8" : "module-lwe-v0.1.5");
     $binary_full = $binary_path . $binary;
 
+    // Verify binary exists
+    if (!file_exists($binary_full)) {
+        throw new Exception("Encryption binary not found: $binary_full");
+    }
+
     if ($encryption_method == "ring_lwe") {
         // Inline key works fine for ring-lwe
-        $cmd = escapeshellcmd($binary_full);
-        $command = $cmd
+        $command = escapeshellarg($binary_full)
             . " encrypt "
             . "--pubkey " . escapeshellarg(trim($public_key))
             . " " . escapeshellarg(trim($plaintext))
