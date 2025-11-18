@@ -11,9 +11,9 @@ iOS frontend written in Swift: [https://github.com/open-encrypt/open-encrypt-ios
 
 ## Public API
 
-A public API is available for performing key generation, encryption, and decryption. 
+A public API is available for performing key generation, encryption, and decryption.
 
-The public API key is `open-encrypt-public-api-key`.
+The public API key is `open-encrypt-public-api-key`. It is currently rate limited to 60 requests / min.
 
 ### Key Generation
 
