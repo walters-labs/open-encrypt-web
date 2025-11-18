@@ -14,8 +14,12 @@ include_once(__DIR__ . '/utils.php');                  // API-level utilities
 try {
     $db = get_db();
 
-    // Optional: validate API key, or skip for public health check
-    // $api_key = validate_api_key($db);
+    /* 1. Validate API key */
+    $api_key = validate_api_key($db);
+
+    /* 2. Rate limit */
+    $limit = fetch_rate_limit($db, $api_key);
+    check_rate_limit($db, $api_key, $limit);
 
     // Lightweight DB check using fetchOne
     $result = $db->fetchOne("SELECT 1", [], "");
