@@ -68,3 +68,14 @@ jobs:
           DB_PASS: root
           DB_NAME: open_encrypt_test
           DB_PORT: 3306
+
+      # 9️⃣ Install jq for API tests
+      - name: Install jq
+        run: sudo apt-get update && sudo apt-get install -y jq
+
+      # 🔟 Run API integration tests
+      - name: Run API integration tests
+        run: |
+          chmod +x tests/test_api.sh
+          cd tests
+          ./test_api.sh
