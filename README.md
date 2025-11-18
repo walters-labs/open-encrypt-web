@@ -13,6 +13,8 @@ iOS frontend written in Swift: [https://github.com/open-encrypt/open-encrypt-ios
 
 A public API is available for performing key generation, encryption, and decryption.
 
+[https://rapidapi.com/jacksonwalters/api/open-encrypt](https://rapidapi.com/jacksonwalters/api/open-encrypt)
+
 The public API key is `open-encrypt-public-api-key`. It is currently rate limited to 60 requests / min.
 
 ### Key Generation
