@@ -16,7 +16,9 @@ switch ($method) {
     case 'GET':
         // List all keys with info (id, prefix, description, active, admin, created_at, rate_limit)
         $rows = $db->fetchAll(
-            "SELECT id, api_key, CONCAT(LEFT(api_key, 12), '…') AS key_prefix, description, active, admin, created_at, rate_limit FROM api_keys ORDER BY created_at DESC"
+            "SELECT id, api_key, LEFT(api_key, 12) || '…' AS key_prefix, description, active, admin, created_at, rate_limit 
+             FROM api_keys 
+             ORDER BY created_at DESC"
         );
         echo json_encode($rows);
         break;
@@ -26,30 +28,27 @@ switch ($method) {
         $data = get_json_input();
 
         $desc = $data['description'] ?? '';
-        $is_admin = !empty($data['admin']) ? 1 : 0;
+        $is_admin = !empty($data['admin']) ? true : false;
         $rate_limit = isset($data['rate_limit']) ? (int)$data['rate_limit'] : 60; // default rate limit per minute
 
         // Generate a secure 64 hex char API key (32 bytes)
         $key = bin2hex(random_bytes(32));
 
-        $ok = $db->execute(
-            "INSERT INTO api_keys (api_key, description, active, admin, rate_limit) VALUES (?, ?, TRUE, ?, ?)",
-            [$key, $desc, $is_admin, $rate_limit],
-            "ssis"
-        );
-
-        if (!$ok) {
+        // Insert and return new id in one query using RETURNING
+        $insert_sql = "INSERT INTO api_keys (api_key, description, active, admin, rate_limit) 
+                       VALUES ($1, $2, TRUE, $3, $4) RETURNING id";
+        $result = $db->fetchOne($insert_sql, [$key, $desc, $is_admin, $rate_limit]);
+        if (!$result || !isset($result['id'])) {
             http_response_code(500);
             echo json_encode(['error' => 'Failed to create API key']);
             exit;
         }
 
-        $id = $db->fetchOne("SELECT LAST_INSERT_ID() AS id")['id'];
+        $id = $result['id'];
 
         $new_key = $db->fetchOne(
-            "SELECT id, api_key, description, active, admin, created_at, rate_limit FROM api_keys WHERE id = ?",
-            [$id],
-            "i"
+            "SELECT id, api_key, description, active, admin, created_at, rate_limit FROM api_keys WHERE id = $1",
+            [$id]
         );
 
         echo json_encode($new_key);
@@ -60,7 +59,7 @@ switch ($method) {
         $data = get_json_input();
 
         $id = $data['id'] ?? null;
-        $active = isset($data['active']) ? ($data['active'] ? 1 : 0) : null;
+        $active = isset($data['active']) ? ($data['active'] ? true : false) : null;
         $rate_limit = isset($data['rate_limit']) ? (int)$data['rate_limit'] : null;
 
         if (!$id || !is_int($id)) {
@@ -76,21 +75,18 @@ switch ($method) {
 
         if ($active !== null && $rate_limit !== null) {
             $ok = $db->execute(
-                "UPDATE api_keys SET active = ?, rate_limit = ? WHERE id = ?",
-                [$active, $rate_limit, $id],
-                "isi"
+                "UPDATE api_keys SET active = $1, rate_limit = $2 WHERE id = $3",
+                [$active, $rate_limit, $id]
             );
         } else if ($active !== null) {
             $ok = $db->execute(
-                "UPDATE api_keys SET active = ? WHERE id = ?",
-                [$active, $id],
-                "ii"
+                "UPDATE api_keys SET active = $1 WHERE id = $2",
+                [$active, $id]
             );
         } else {
             $ok = $db->execute(
-                "UPDATE api_keys SET rate_limit = ? WHERE id = ?",
-                [$rate_limit, $id],
-                "ii"
+                "UPDATE api_keys SET rate_limit = $1 WHERE id = $2",
+                [$rate_limit, $id]
             );
         }
 
@@ -101,9 +97,8 @@ switch ($method) {
         }
 
         $updated_key = $db->fetchOne(
-            "SELECT id, description, active, admin, created_at, rate_limit FROM api_keys WHERE id = ?",
-            [$id],
-            "i"
+            "SELECT id, description, active, admin, created_at, rate_limit FROM api_keys WHERE id = $1",
+            [$id]
         );
 
         echo json_encode($updated_key);
@@ -122,9 +117,8 @@ switch ($method) {
         }
 
         $ok = $db->execute(
-            "DELETE FROM api_keys WHERE id = ?",
-            [$id],
-            "i"
+            "DELETE FROM api_keys WHERE id = $1",
+            [$id]
         );
 
         if (!$ok) {

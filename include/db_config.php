@@ -1,16 +1,26 @@
 <?php
 
 $host     = 'localhost';
-$db       = 'your-db-name-here';
+$db       = 'open_encrypt';
 $user     = 'your-username-here';
 $password = 'your-password-here';
-$port     = 3306;
+$port     = 5432;  // Default PostgreSQL port
 
-$conn = new mysqli($host,$user,$password,$db,$port);
+$conn_string = sprintf(
+    "host=%s port=%d dbname=%s user=%s password=%s",
+    $host,
+    $port,
+    $db,
+    $user,
+    $password
+);
 
-/* check connection */
-if ($conn->connect_error) {
-   echo "Not connected" . $conn->connect_error;
+$conn = pg_connect($conn_string);
+
+if (!$conn) {
+    echo "Not connected to PostgreSQL database.";
+    error_log("PostgreSQL connection failed: " . pg_last_error());
+    exit;  // stop execution if no connection
 }
-
 ?>
+

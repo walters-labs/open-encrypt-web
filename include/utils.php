@@ -21,7 +21,7 @@ function redirect($url) {
     die();
 }
 
-//define a function which logs out the user
+// Define a function which logs out the user
 function logout(){
     // Unset all of the session variables.
     $_SESSION = array();
@@ -41,7 +41,7 @@ function logout(){
     redirect("login.php");
 }
 
-// create a temporary file and return its name
+// Create a temporary file and return its name
 function make_tempfile($prefix = 'oe_') {
     $tmp = sys_get_temp_dir();
     $name = tempnam($tmp, $prefix);
@@ -51,21 +51,20 @@ function make_tempfile($prefix = 'oe_') {
     return $name;
 }
 
-// generate a secure login token
+// Generate a secure login token
 function generate_token(): string {
     return bin2hex(random_bytes(16)); // 32 characters
 }
 
-// fetch the public key for a given username
+// Fetch the public key for a given username
 function fetch_public_key(Database $db, string $username): ?string {
     if (!username_exists($db, $username, "public_keys")) {
         return null;
     }
 
     $row = $db->fetchOne(
-        "SELECT public_key FROM public_keys WHERE username = ?",
-        [$username],
-        "s"
+        "SELECT public_key FROM public_keys WHERE username = $1",
+        [$username]
     );
 
     return $row['public_key'] ?? null;
@@ -78,9 +77,8 @@ function fetch_encryption_method(Database $db, string $username): ?string {
     }
 
     $row = $db->fetchOne(
-        "SELECT method FROM public_keys WHERE username = ?",
-        [$username],
-        "s"
+        "SELECT method FROM public_keys WHERE username = $1",
+        [$username]
     );
 
     return $row['method'] ?? null;
@@ -92,14 +90,21 @@ function username_exists(Database $db, string $username, string $table = "login_
     if (!in_array($table, $allowed_tables)) {
         throw new Exception("Invalid table name");
     }
-    $query = "SELECT COUNT(*) FROM `$table` WHERE username = ?";
-    $count = $db->count($query, [$username], "s");
+
+    // Important: identifiers cannot be parameterized in pgSQL,
+    // so you must sanitize or whitelist the table name as done above.
+
+    $query = "SELECT COUNT(*) FROM $table WHERE username = $1";
+    $count = $db->count($query, [$username]);
     return $count > 0;
 }
 
-// store login token in database
+// Store login token in database
 function store_token(Database $db, string $username, string $token): bool {
-    return $db->execute("UPDATE login_info SET token = ? WHERE username = ?", [$token, $username], "ss");
+    return $db->execute(
+        "UPDATE login_info SET token = $1 WHERE username = $2",
+        [$token, $username]
+    );
 }
 
 /**
@@ -200,12 +205,11 @@ function valid_public_key(string $public_key, string $encryption_method = "ring_
 function display_messages(Database $db, string $username, ?string $seckey_tempfile = null, ?string $encryption_method = null) {
     try {
         $messages = $db->fetchAll(
-            "SELECT `id`,`from`,`to`,`message`,`method`,`timestamp` 
-             FROM `messages` 
-             WHERE `to` = ? 
-             ORDER BY `id` DESC",
-            [$username],
-            "s"
+            "SELECT id, sender, recipient, message, method, timestamp
+            FROM messages
+            WHERE recipient = $1
+            ORDER BY id DESC",
+            [$username]
         );
 
         if (empty($messages)) {
@@ -219,7 +223,7 @@ function display_messages(Database $db, string $username, ?string $seckey_tempfi
 
         foreach ($messages as $row) {
             echo "<p>[id=" . htmlspecialchars($row['id']) . "] ";
-            echo htmlspecialchars($row['from']) . " --> " . htmlspecialchars($row['to']);
+            echo htmlspecialchars($row['sender']) . " --> " . htmlspecialchars($row['recipient']);
             if (!$seckey_tempfile) echo " (" . htmlspecialchars($row['method']) . ")";
 
             if (!empty($row['timestamp'])) {
@@ -259,7 +263,7 @@ function display_messages(Database $db, string $username, ?string $seckey_tempfi
     }
 }
 
-// send an encrypted message from one user to another
+// Send an encrypted message from one user to another
 function send_message(Database $db, string $username, string $to_username, string $message): array {
     // Will return: ['success' => bool, 'message' => string]
 
@@ -274,9 +278,8 @@ function send_message(Database $db, string $username, string $to_username, strin
     }
 
     $recipient = $db->fetchOne(
-        "SELECT username FROM login_info WHERE username = ?",
-        [$to_username],
-        "s"
+        "SELECT username FROM login_info WHERE username = $1",
+        [$to_username]
     );
     if ($recipient === null) {
         error_log("Error: Non-existent recipient '$to_username' by '$username'");
@@ -284,9 +287,8 @@ function send_message(Database $db, string $username, string $to_username, strin
     }
 
     $pub_row = $db->fetchOne(
-        "SELECT public_key, method FROM public_keys WHERE username = ?",
-        [$to_username],
-        "s"
+        "SELECT public_key, method FROM public_keys WHERE username = $1",
+        [$to_username]
     );
     if ($pub_row === null || !valid_public_key($pub_row['public_key'], $pub_row['method'])) {
         error_log("Error: Invalid/missing public key for '$to_username' (sent by '$username')");
@@ -301,9 +303,8 @@ function send_message(Database $db, string $username, string $to_username, strin
     }
 
     $success = $db->execute(
-        "INSERT INTO messages (`from`,`to`,`message`,`method`) VALUES (?,?,?,?)",
-        [$username, $to_username, $encrypted, $pub_row['method']],
-        "ssss"
+        "INSERT INTO messages (sender, recipient, message, method) VALUES ($1, $2, $3, $4)",
+        [$username, $to_username, $encrypted, $pub_row['method']]
     );
 
     if (!$success) {

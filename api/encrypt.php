@@ -51,7 +51,10 @@ try {
 
 } catch (Exception $e) {
     error_log("encrypt error: " . $e->getMessage());
-    // 400 for client errors (bad input), 500 for server errors
+
     $status_code = (strpos($e->getMessage(), 'Invalid') !== false) ? 400 : 500;
+    http_response_code($status_code);
+    
     echo json_encode(['error' => 'Encryption failed. Please check your method and public key.']);
+    exit;
 }

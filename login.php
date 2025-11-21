@@ -7,6 +7,7 @@ error_reporting(E_ALL);
 include_once 'include/db_config.php';
 include_once 'include/Database.php';
 require_once 'include/utils.php';
+
 $db = new Database($conn);
 
 session_start();
@@ -25,7 +26,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $valid_password = valid_password($password);
 
     if ($valid_username && $valid_password) {
-        $row = $db->fetchOne("SELECT password FROM login_info WHERE username = ?", [$username], "s");
+        // NOTE: pgSQL uses $1 for parameter placeholders, no type string
+        $row = $db->fetchOne("SELECT password FROM login_info WHERE username = $1", [$username]);
 
         if ($row && password_verify($password, $row['password'])) {
             $login_token = generate_token();

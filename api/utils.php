@@ -28,9 +28,8 @@ function validate_admin_api_key(Database $db) {
 
     // Query admin and active flags
     $row = $db->fetchOne(
-        "SELECT admin, active FROM api_keys WHERE api_key = ?",
-        [$api_key],
-        "s"
+        "SELECT admin, active FROM api_keys WHERE api_key = $1",
+        [$api_key]
     );
 
     if (!$row || !$row['active']) {
@@ -62,9 +61,8 @@ function validate_api_key(Database $db) {
     }
 
     $row = $db->fetchOne(
-        "SELECT active FROM api_keys WHERE api_key = ?",
-        [$api_key],
-        "s"
+        "SELECT active FROM api_keys WHERE api_key = $1",
+        [$api_key]
     );
 
     if (!$row || !$row['active']) {
@@ -79,9 +77,8 @@ function validate_api_key(Database $db) {
 // Fetch rate limit for the key (requests per minute or similar)
 function fetch_rate_limit(Database $db, string $api_key) {
     $row = $db->fetchOne(
-        "SELECT rate_limit FROM api_keys WHERE api_key = ?",
-        [$api_key],
-        "s"
+        "SELECT rate_limit FROM api_keys WHERE api_key = $1",
+        [$api_key]
     );
 
     if (!$row) {
@@ -97,14 +94,15 @@ function fetch_rate_limit(Database $db, string $api_key) {
 function check_rate_limit(Database $db, string $api_key, int $limit) {
     $time_window = date('Y-m-d H:i:00');  // minute resolution
 
-    // Try to insert usage record or update count atomically
+    // PostgreSQL UPSERT syntax (assuming unique constraint on (api_key, time_window))
     $sql = "
         INSERT INTO api_key_usage (api_key, time_window, count)
-        VALUES (?, ?, 1)
-        ON DUPLICATE KEY UPDATE count = count + 1;
+        VALUES ($1, $2, 1)
+        ON CONFLICT (api_key, time_window) DO UPDATE
+        SET count = api_key_usage.count + 1;
     ";
 
-    $ok = $db->execute($sql, [$api_key, $time_window], "ss");
+    $ok = $db->execute($sql, [$api_key, $time_window]);
 
     if (!$ok) {
         http_response_code(500);
@@ -114,9 +112,8 @@ function check_rate_limit(Database $db, string $api_key, int $limit) {
 
     // Now fetch the current count
     $row = $db->fetchOne(
-        "SELECT count FROM api_key_usage WHERE api_key = ? AND time_window = ?",
-        [$api_key, $time_window],
-        "ss"
+        "SELECT count FROM api_key_usage WHERE api_key = $1 AND time_window = $2",
+        [$api_key, $time_window]
     );
 
     $current_count = (int)($row['count'] ?? 0);

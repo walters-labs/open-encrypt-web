@@ -21,8 +21,8 @@ try {
     $limit = fetch_rate_limit($db, $api_key);
     check_rate_limit($db, $api_key, $limit);
 
-    // Lightweight DB check using fetchOne
-    $result = $db->fetchOne("SELECT 1", [], "");
+    // Lightweight DB check
+    $result = $db->fetchOne("SELECT 1", []);
     if ($result === false) {
         throw new Exception("Database query failed");
     }
@@ -30,7 +30,6 @@ try {
     echo json_encode([
         'status'    => 'ok',
         'timestamp' => time(),
-        // 'api_key_valid' => ($api_key !== null), // uncomment if validating API key
         'message'   => 'API is healthy',
     ]);
 } catch (Exception $e) {
