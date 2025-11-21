@@ -33,10 +33,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($valid_username && $valid_password) {
         $hashed_password = password_hash($password, PASSWORD_DEFAULT);
 
+        // PostgreSQL style placeholders ($1, $2)
         $success = $db->execute(
-            "INSERT INTO login_info (username, password) VALUES (?, ?)",
-            [$username, $hashed_password],
-            "ss"
+            "INSERT INTO login_info (username, password) VALUES ($1, $2)",
+            [$username, $hashed_password]
         );
 
         if ($success) {

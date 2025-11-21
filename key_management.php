@@ -129,18 +129,16 @@ if (isset($_POST['save_keys'], $_SESSION['public_key'], $_SESSION['encryption_me
         error_log("Error: Invalid public key for user " . htmlspecialchars($username));
         echo "<p>Error: Invalid public key.</p>";
     } else {
-        $existing = $db->fetchOne("SELECT username FROM public_keys WHERE username = ?", [$username], "s");
+        $existing = $db->fetchOne("SELECT username FROM public_keys WHERE username = $1", [$username]);
         if ($existing === null) {
             $success = $db->execute(
-                "INSERT INTO public_keys (username, public_key, method) VALUES (?, ?, ?)",
-                [$username, $public_key, $encryption_method],
-                "sss"
+                "INSERT INTO public_keys (username, public_key, method) VALUES ($1, $2, $3)",
+                [$username, $public_key, $encryption_method]
             );
         } else {
             $success = $db->execute(
-                "UPDATE public_keys SET public_key = ?, method = ? WHERE username = ?",
-                [$public_key, $encryption_method, $username],
-                "sss"
+                "UPDATE public_keys SET public_key = $1, method = $2 WHERE username = $3",
+                [$public_key, $encryption_method, $username]
             );
         }
 

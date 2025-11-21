@@ -51,6 +51,10 @@ try {
 
 } catch (Exception $e) {
     error_log("decrypt error: " . $e->getMessage());
-    http_response_code(500);
+
+    $status_code = (strpos($e->getMessage(), 'Invalid') !== false) ? 400 : 500;
+    http_response_code($status_code);
+
     echo json_encode(['error' => 'Decryption failed']);
+    exit;
 }
