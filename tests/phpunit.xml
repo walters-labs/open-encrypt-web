@@ -7,10 +7,10 @@
     <!-- Define environment variables for the test database -->
     <php>
         <env name="DB_HOST" value="127.0.0.1"/>
-        <env name="DB_USER" value="root"/>
-        <env name="DB_PASS" value="root"/>
+        <env name="DB_USER" value="your_pg_user"/>
+        <env name="DB_PASS" value="your_pg_password"/>
         <env name="DB_NAME" value="open_encrypt_test"/>
-        <env name="DB_PORT" value="3306"/>
+        <env name="DB_PORT" value="5432"/>
     </php>
 
     <testsuites>

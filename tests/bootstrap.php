@@ -4,8 +4,10 @@ $host = getenv('DB_HOST');
 $user = getenv('DB_USER');
 $pass = getenv('DB_PASS');
 $name = getenv('DB_NAME');
+$port = getenv('DB_PORT') ?: 5432;
 
-$pdo = new PDO("mysql:host=$host;dbname=$name;charset=utf8mb4", $user, $pass);
+$dsn = "pgsql:host=$host;port=$port;dbname=$name";
+$pdo = new PDO($dsn, $user, $pass);
 $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
 $GLOBALS['pdo'] = $pdo; // Make it accessible in tests
