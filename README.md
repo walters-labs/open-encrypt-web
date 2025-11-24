@@ -35,10 +35,10 @@ Currently using Rust binaries `ring-lwe` v0.1.8 and `module-lwe` v0.1.5.
 
 ## Database
 
-- The `mySQL` database and all tables can be initialized with the script `schema.sql`.
+- The `pgSQL` database and all tables can be initialized with the script `open_encrypt_schema_pg.sql`.
 - Passwords are hashed using standard hashing. 
 - Secure, random tokens stored for user sessions.
-- Messages are stored encrypted on the server in a SQL database.
+- Messages are stored encrypted on the server in a pgSQL table.
 - For both ring-LWE and module-LWE, messages are stored as compressed and encoded base64 strings.
 
 ## Backend
